@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { currentUser } from "@clerk/nextjs";
-import prisma from "../lib/prisma";
-import { FormSchema, formSchema } from "@/schemas/form";
+import { currentUser } from '@clerk/nextjs';
+import prisma from '../lib/prisma';
+import { FormSchema, formSchema } from '@/schemas/form';
 
 class UserNotFound extends Error {}
 
@@ -38,7 +38,7 @@ export async function GetFormStats() {
 export async function CreateForm(data: FormSchema) {
   const validation = formSchema.safeParse(data);
   if (!validation.success) {
-    throw new Error("Form not valid");
+    throw new Error('Form not valid');
   }
 
   const user = await currentUser();
@@ -53,7 +53,7 @@ export async function CreateForm(data: FormSchema) {
   });
 
   if (formExist) {
-    throw new Error("Form already exists");
+    throw new Error('Form already exists');
   }
 
   const form = await prisma.form.create({
@@ -65,7 +65,7 @@ export async function CreateForm(data: FormSchema) {
   });
 
   if (!form) {
-    throw new Error("something went wrong");
+    throw new Error('something went wrong');
   }
 
   return form.id;
@@ -82,7 +82,7 @@ export async function GetForms() {
       userId: user.id,
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: 'desc',
     },
   });
 }
@@ -90,12 +90,28 @@ export async function GetForms() {
 export async function GetFormById(id: number) {
   const user = await currentUser();
   if (!user) {
-    throw new UserNotFound("U not login");
+    throw new UserNotFound('U not login');
   }
 
   return await prisma.form.findUnique({
     where: {
       id,
+    },
+  });
+}
+
+export async function UpdateFormContent(json: string, id: number) {
+  const user = await currentUser();
+  if (!user) {
+    throw new UserNotFound('U not login');
+  }
+  return await prisma.form.update({
+    where: {
+      id,
+      userId: user.id,
+    },
+    data: {
+      content: json,
     },
   });
 }
